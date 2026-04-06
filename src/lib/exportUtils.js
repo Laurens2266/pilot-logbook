@@ -29,15 +29,7 @@ function rows(flights) {
   }))
 }
 
-async function shareOrDownload(blob, filename) {
-  // Try Web Share API first (works great on iOS as native share sheet)
-  if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: blob.type })] })) {
-    const file = new File([blob], filename, { type: blob.type })
-    await navigator.share({ files: [file], title: filename })
-    return
-  }
-
-  // Fallback: blob URL download
+function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -55,7 +47,7 @@ export async function exportExcel(flights) {
   utils.book_append_sheet(wb, ws, 'Logbook')
   const buf = write(wb, { bookType: 'xlsx', type: 'array' })
   const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-  await shareOrDownload(blob, 'logbook.xlsx')
+  downloadBlob(blob, 'logbook.xlsx')
 }
 
 export async function exportPDF(flights) {
@@ -92,11 +84,15 @@ export async function exportPDF(flights) {
     ],
     body: rows(flights),
     styles: { fontSize: 7, cellPadding: 1.5 },
-    headStyles: { fillColor: [29, 78, 216], fontSize: 7, fontStyle: 'bold' },
+    headStyles: { fillColor: [14, 116, 144], fontSize: 7, fontStyle: 'bold' },
     alternateRowStyles: { fillColor: [245, 247, 250] },
     columnStyles: { Comments: { cellWidth: 30 } },
   })
 
-  const blob = doc.output('blob')
-  await shareOrDownload(blob, 'logbook.pdf')
+  // Open PDF in a new tab — works on all platforms including iOS
+  // On iOS: shows PDF viewer with its own share/save options
+  // On desktop: opens in browser PDF viewer where you can save
+  const url = URL.createObjectURL(doc.output('blob'))
+  window.open(url)
+  setTimeout(() => URL.revokeObjectURL(url), 60000)
 }
