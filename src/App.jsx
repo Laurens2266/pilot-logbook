@@ -205,6 +205,7 @@ export default function App() {
             onConnect={startOAuthFlow}
             onDisconnect={handleDisconnect}
             onSync={syncDown}
+            flights={flights}
           />
         )}
       </main>

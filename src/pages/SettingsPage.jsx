@@ -1,4 +1,19 @@
-export default function SettingsPage({ connected, syncStatus, onConnect, onDisconnect, onSync }) {
+import { useState } from 'react'
+import { exportExcel, exportPDF } from '../lib/exportUtils'
+
+export default function SettingsPage({ connected, syncStatus, onConnect, onDisconnect, onSync, flights }) {
+  const [exporting, setExporting] = useState(null) // 'excel' | 'pdf' | null
+
+  async function handleExport(type) {
+    setExporting(type)
+    try {
+      if (type === 'excel') await exportExcel(flights)
+      else                  await exportPDF(flights)
+    } finally {
+      setExporting(null)
+    }
+  }
+
   return (
     <div className="h-full overflow-y-auto p-4 space-y-4 pb-10">
 
@@ -42,6 +57,28 @@ export default function SettingsPage({ connected, syncStatus, onConnect, onDisco
             Connect Dropbox
           </button>
         )}
+      </section>
+
+      {/* ── Export ── */}
+      <section className="bg-white rounded-xl shadow-sm p-4 space-y-3">
+        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Export</h3>
+        <p className="text-sm text-gray-500">{flights.length} flight{flights.length !== 1 ? 's' : ''} in logbook</p>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => handleExport('excel')}
+            disabled={!!exporting || flights.length === 0}
+            className="py-3 border border-green-300 text-green-700 rounded-xl text-sm font-semibold disabled:opacity-50 active:bg-green-50"
+          >
+            {exporting === 'excel' ? 'Exporting…' : 'Export Excel'}
+          </button>
+          <button
+            onClick={() => handleExport('pdf')}
+            disabled={!!exporting || flights.length === 0}
+            className="py-3 border border-red-200 text-red-600 rounded-xl text-sm font-semibold disabled:opacity-50 active:bg-red-50"
+          >
+            {exporting === 'pdf' ? 'Exporting…' : 'Export PDF'}
+          </button>
+        </div>
       </section>
 
     </div>
