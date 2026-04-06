@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { hhmm2min, min2hhmm, today } from '../lib/timeUtils'
 
 const EMPTY_FLIGHT = {
@@ -51,9 +51,37 @@ function DurationInput({ value, onChange, placeholder = '0:00' }) {
   )
 }
 
+// ── Shared field components (defined outside to avoid remount on re-render) ───
+
+function Field({ label, error, children }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{label}</label>
+      {children}
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    </div>
+  )
+}
+
+function TextInput({ field, value, onChange, upper = false, list, maxLength, placeholder, inputMode, error }) {
+  return (
+    <input
+      type="text"
+      value={value ?? ''}
+      onChange={e => onChange(field, upper ? e.target.value.toUpperCase() : e.target.value)}
+      list={list}
+      maxLength={maxLength}
+      placeholder={placeholder}
+      inputMode={inputMode}
+      className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+        ${error ? 'border-red-400' : 'border-gray-300'}`}
+    />
+  )
+}
+
 // ── Form ──────────────────────────────────────────────────────────────────────
 
-export default function FlightFormPage({ flight, flights, onSave, onDelete, onCancel }) {
+export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
   const isEdit = !!flight?.id
   const [form, setForm] = useState(flight ? { ...EMPTY_FLIGHT, ...flight } : { ...EMPTY_FLIGHT })
   const [errors, setErrors] = useState({})
@@ -69,14 +97,6 @@ export default function FlightFormPage({ flight, flights, onSave, onDelete, onCa
       setForm(f => ({ ...f, totalFlightTime: e - s }))
     }
   }, [form.flightStart, form.flightEnd])
-
-  // Datalist suggestions derived from existing flights
-  const suggestions = useMemo(() => ({
-    regs:   [...new Set(flights.map(f => f.registration).filter(Boolean))],
-    models: [...new Set(flights.map(f => f.model).filter(Boolean))],
-    icaos:  [...new Set(flights.flatMap(f => [f.from, f.to]).filter(Boolean))],
-    pics:   [...new Set(flights.map(f => f.nameOfPIC).filter(Boolean))],
-  }), [flights])
 
   function set(field, value) {
     setForm(f => ({ ...f, [field]: value }))
@@ -120,34 +140,6 @@ export default function FlightFormPage({ flight, flights, onSave, onDelete, onCa
     setSaving(false)
   }
 
-  // ── Render helpers ──────────────────────────────────────────────────────────
-
-  function Field({ label, error, children }) {
-    return (
-      <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{label}</label>
-        {children}
-        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-      </div>
-    )
-  }
-
-  function TextInput({ field, upper = false, list, maxLength, placeholder, inputMode }) {
-    return (
-      <input
-        type="text"
-        value={form[field] ?? ''}
-        onChange={e => set(field, upper ? e.target.value.toUpperCase() : e.target.value)}
-        list={list}
-        maxLength={maxLength}
-        placeholder={placeholder}
-        inputMode={inputMode}
-        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500
-          ${errors[field] ? 'border-red-400' : 'border-gray-300'}`}
-      />
-    )
-  }
-
   return (
     <div className="h-full overflow-y-auto">
       {/* Sticky header */}
@@ -183,17 +175,11 @@ export default function FlightFormPage({ flight, flights, onSave, onDelete, onCa
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Registration" error={errors.registration}>
-              <TextInput field="registration" upper list="list-regs" placeholder="PH-ELW" />
-              <datalist id="list-regs">
-                {suggestions.regs.map(r => <option key={r} value={r} />)}
-              </datalist>
+              <TextInput field="registration" value={form.registration} onChange={set} upper placeholder="PH-ELW" error={errors.registration} />
             </Field>
 
             <Field label="Model" error={errors.model}>
-              <TextInput field="model" list="list-models" placeholder="S200" />
-              <datalist id="list-models">
-                {suggestions.models.map(m => <option key={m} value={m} />)}
-              </datalist>
+              <TextInput field="model" value={form.model} onChange={set} placeholder="S200" error={errors.model} />
             </Field>
           </div>
         </section>
@@ -203,7 +189,7 @@ export default function FlightFormPage({ flight, flights, onSave, onDelete, onCa
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Flight Times</p>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Block Off" error={errors.flightStart}>
+            <Field label="Departure Time" error={errors.flightStart}>
               <input
                 type="time"
                 value={form.flightStart}
@@ -213,7 +199,7 @@ export default function FlightFormPage({ flight, flights, onSave, onDelete, onCa
               />
             </Field>
 
-            <Field label="Block On" error={errors.flightEnd}>
+            <Field label="Arrival Time" error={errors.flightEnd}>
               <input
                 type="time"
                 value={form.flightEnd}
@@ -231,7 +217,7 @@ export default function FlightFormPage({ flight, flights, onSave, onDelete, onCa
             <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-mono font-semibold text-gray-800">
               {form.totalFlightTime ? min2hhmm(form.totalFlightTime) : '—'}
             </div>
-            <p className="text-xs text-gray-400 mt-1">Auto-calculated from block off / on</p>
+            <p className="text-xs text-gray-400 mt-1">Auto-calculated from departure / arrival time</p>
           </div>
         </section>
 
@@ -239,16 +225,12 @@ export default function FlightFormPage({ flight, flights, onSave, onDelete, onCa
         <section className="bg-white rounded-xl shadow-sm p-4 space-y-4">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Route</p>
 
-          <datalist id="list-icao">
-            {suggestions.icaos.map(c => <option key={c} value={c} />)}
-          </datalist>
-
           <div className="grid grid-cols-2 gap-3">
             <Field label="Departure (ICAO)" error={errors.from}>
-              <TextInput field="from" upper list="list-icao" maxLength={4} placeholder="EHTE" />
+              <TextInput field="from" value={form.from} onChange={set} upper maxLength={4} placeholder="EHTE" error={errors.from} />
             </Field>
             <Field label="Destination (ICAO)" error={errors.to}>
-              <TextInput field="to" upper list="list-icao" maxLength={4} placeholder="EHTE" />
+              <TextInput field="to" value={form.to} onChange={set} upper maxLength={4} placeholder="EHTE" error={errors.to} />
             </Field>
           </div>
 
@@ -282,10 +264,7 @@ export default function FlightFormPage({ flight, flights, onSave, onDelete, onCa
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Crew & Role</p>
 
           <Field label="Name of PIC" error={errors.nameOfPIC}>
-            <TextInput field="nameOfPIC" list="list-pics" placeholder="L. Pelgrom" />
-            <datalist id="list-pics">
-              {suggestions.pics.map(p => <option key={p} value={p} />)}
-            </datalist>
+            <TextInput field="nameOfPIC" value={form.nameOfPIC} onChange={set} placeholder="L. Pelgrom" error={errors.nameOfPIC} />
           </Field>
 
           <div className="grid grid-cols-2 gap-3">

@@ -57,7 +57,7 @@ export default function LogbookPage({ flights, onAdd, onEdit }) {
                 <th className="text-left px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">Route</th>
                 <th className="text-right px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">Time</th>
                 <th className="text-center px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">Role</th>
-                <th className="text-center px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">Ldg</th>
+                <th className="text-center px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">Landings</th>
               </tr>
             </thead>
             <tbody>
@@ -76,7 +76,8 @@ export default function LogbookPage({ flights, onAdd, onEdit }) {
                       <div className="text-xs text-gray-500">{flight.model}</div>
                     </td>
                     <td className="px-3 py-2.5 whitespace-nowrap text-gray-700">
-                      {flight.from} → {flight.to}
+                      <div>{flight.from} → {flight.to}</div>
+                      {flight.nameOfPIC && <div className="text-xs text-gray-500">{flight.nameOfPIC}</div>}
                     </td>
                     <td className="px-3 py-2.5 text-right font-mono font-medium text-gray-900 whitespace-nowrap">
                       {min2hhmm(flight.totalFlightTime)}
