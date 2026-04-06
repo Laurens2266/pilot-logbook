@@ -60,7 +60,7 @@ export async function exportExcel(flights) {
 
 export async function exportPDF(flights) {
   const { default: jsPDF } = await import('jspdf')
-  await import('jspdf-autotable')
+  const { default: autoTable } = await import('jspdf-autotable')
 
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
 
@@ -70,7 +70,7 @@ export async function exportPDF(flights) {
   doc.setTextColor(120)
   doc.text(`Exported ${new Date().toLocaleDateString('en-GB')} — ${flights.length} flights`, 14, 20)
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 25,
     columns: [
       { header: 'Date',       dataKey: 'Date' },

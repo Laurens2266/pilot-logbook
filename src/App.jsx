@@ -167,9 +167,9 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <header className="bg-blue-700 text-white px-4 py-3 pt-safe flex items-center justify-between flex-shrink-0">
+      <header className="bg-blue-700 dark:bg-blue-900 text-white px-4 py-3 pt-safe flex items-center justify-between flex-shrink-0">
         <span className="text-lg font-bold tracking-wide">✈ Pilot Logbook</span>
         <span className="text-sm">
           {syncStatus === 'syncing' && (
@@ -212,13 +212,13 @@ export default function App() {
 
       {/* Bottom navigation */}
       {page !== 'form' && connected && (
-        <nav className="bg-white border-t border-gray-200 flex flex-shrink-0 pb-safe">
+        <nav className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex flex-shrink-0 pb-safe">
           {navItems.map(({ id, label, Icon }) => (
             <button
               key={id}
               onClick={() => setPage(id)}
               className={`flex-1 flex flex-col items-center gap-1 py-2 text-xs font-medium transition-colors
-                ${page === id ? 'text-blue-600' : 'text-gray-500'}`}
+                ${page === id ? 'text-blue-500' : 'text-gray-500 dark:text-gray-400'}`}
             >
               <Icon active={page === id} />
               {label}

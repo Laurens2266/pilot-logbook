@@ -2,11 +2,11 @@ import { useState, useMemo } from 'react'
 import { min2hhmm, fmtDate } from '../lib/timeUtils'
 
 function roleLabel(f) {
-  if (f.pic)     return { label: 'PIC',  cls: 'bg-blue-100 text-blue-700' }
-  if (f.fi)      return { label: 'FI',   cls: 'bg-green-100 text-green-700' }
-  if (f.coPilot) return { label: 'Co-P', cls: 'bg-purple-100 text-purple-700' }
-  if (f.dual)    return { label: 'Dual', cls: 'bg-amber-100 text-amber-700' }
-  return { label: '—', cls: 'bg-gray-100 text-gray-500' }
+  if (f.pic)     return { label: 'PIC',  cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' }
+  if (f.fi)      return { label: 'FI',   cls: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' }
+  if (f.coPilot) return { label: 'Co-P', cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' }
+  if (f.dual)    return { label: 'Dual', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' }
+  return { label: '—', cls: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400' }
 }
 
 export default function LogbookPage({ flights, onAdd, onEdit, connected, onConnect }) {
@@ -15,12 +15,12 @@ export default function LogbookPage({ flights, onAdd, onEdit, connected, onConne
   if (!connected) {
     return (
       <div className="flex flex-col items-center justify-center h-full px-8 text-center gap-5">
-        <svg className="w-16 h-16 text-gray-300" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+        <svg className="w-16 h-16 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5v-9m0 0-3 3m3-3 3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 5.25 5.25 0 011.524 10.32A4.5 4.5 0 0117.25 19.5H6.75z" />
         </svg>
         <div>
-          <p className="text-lg font-semibold text-gray-700">Connect Dropbox</p>
-          <p className="text-sm text-gray-500 mt-1">Connect your Dropbox account to access and sync your logbook.</p>
+          <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">Connect Dropbox</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Connect your Dropbox account to access and sync your logbook.</p>
         </div>
         <button
           onClick={onConnect}
@@ -46,13 +46,13 @@ export default function LogbookPage({ flights, onAdd, onEdit, connected, onConne
   return (
     <div className="flex flex-col h-full">
       {/* Search */}
-      <div className="px-3 py-2 bg-white border-b border-gray-200 flex-shrink-0">
+      <div className="px-3 py-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <input
           type="search"
           placeholder="Search by date, aircraft, route, PIC…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
         />
       </div>
 
@@ -63,21 +63,21 @@ export default function LogbookPage({ flights, onAdd, onEdit, connected, onConne
             <svg className="w-16 h-16 mb-4 opacity-40" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.966 8.966 0 00-6 2.292m0-14.25v14.25" />
             </svg>
-            <p className="text-lg font-medium text-gray-500">
+            <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
               {search ? 'No flights match your search' : 'No flights yet'}
             </p>
-            {!search && <p className="text-sm mt-1">Tap + to log your first flight</p>}
+            {!search && <p className="text-sm mt-1 dark:text-gray-500">Tap + to log your first flight</p>}
           </div>
         ) : (
           <table className="w-full text-sm min-w-[560px]">
-            <thead className="bg-gray-100 sticky top-0 z-10">
+            <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
               <tr>
-                <th className="text-left px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">Date</th>
-                <th className="text-left px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">Aircraft</th>
-                <th className="text-left px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">Route</th>
-                <th className="text-right px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">Time</th>
-                <th className="text-center px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">Role</th>
-                <th className="text-center px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">Landings</th>
+                <th className="text-left px-3 py-2 font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap">Date</th>
+                <th className="text-left px-3 py-2 font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap">Aircraft</th>
+                <th className="text-left px-3 py-2 font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap">Route</th>
+                <th className="text-right px-3 py-2 font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap">Time</th>
+                <th className="text-center px-3 py-2 font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap">Role</th>
+                <th className="text-center px-3 py-2 font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap">Landings</th>
               </tr>
             </thead>
             <tbody>
@@ -87,19 +87,19 @@ export default function LogbookPage({ flights, onAdd, onEdit, connected, onConne
                   <tr
                     key={flight.id}
                     onClick={() => onEdit(flight)}
-                    className={`border-b border-gray-100 active:bg-blue-50 cursor-pointer
-                      ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                    className={`border-b border-gray-100 dark:border-gray-800 active:bg-blue-50 dark:active:bg-blue-950 cursor-pointer
+                      ${i % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-850'}`}
                   >
-                    <td className="px-3 py-2.5 whitespace-nowrap text-gray-700">{fmtDate(flight.date)}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-gray-700 dark:text-gray-300">{fmtDate(flight.date)}</td>
                     <td className="px-3 py-2.5 whitespace-nowrap">
-                      <div className="font-medium text-gray-900">{flight.registration}</div>
-                      <div className="text-xs text-gray-500">{flight.model}</div>
+                      <div className="font-medium text-gray-900 dark:text-gray-100">{flight.registration}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{flight.model}</div>
                     </td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-gray-700">
+                    <td className="px-3 py-2.5 whitespace-nowrap text-gray-700 dark:text-gray-300">
                       <div>{flight.from} → {flight.to}</div>
-                      {flight.nameOfPIC && <div className="text-xs text-gray-500">{flight.nameOfPIC}</div>}
+                      {flight.nameOfPIC && <div className="text-xs text-gray-500 dark:text-gray-400">{flight.nameOfPIC}</div>}
                     </td>
-                    <td className="px-3 py-2.5 text-right font-mono font-medium text-gray-900 whitespace-nowrap">
+                    <td className="px-3 py-2.5 text-right font-mono font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
                       {min2hhmm(flight.totalFlightTime)}
                     </td>
                     <td className="px-3 py-2.5 text-center whitespace-nowrap">
@@ -107,7 +107,7 @@ export default function LogbookPage({ flights, onAdd, onEdit, connected, onConne
                         {role.label}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5 text-center text-gray-700">{flight.landings}</td>
+                    <td className="px-3 py-2.5 text-center text-gray-700 dark:text-gray-300">{flight.landings}</td>
                   </tr>
                 )
               })}
@@ -118,7 +118,7 @@ export default function LogbookPage({ flights, onAdd, onEdit, connected, onConne
 
       {/* Footer totals */}
       {filtered.length > 0 && (
-        <div className="bg-gray-100 border-t border-gray-200 px-4 py-2 flex justify-between text-sm text-gray-600 flex-shrink-0">
+        <div className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex justify-between text-sm text-gray-600 dark:text-gray-300 flex-shrink-0">
           <span>{filtered.length} flight{filtered.length !== 1 ? 's' : ''}</span>
           <span className="font-mono font-semibold">{min2hhmm(totalMinutes)} total</span>
         </div>
@@ -127,7 +127,7 @@ export default function LogbookPage({ flights, onAdd, onEdit, connected, onConne
       {/* FAB */}
       <button
         onClick={onAdd}
-        className="fixed bottom-20 right-5 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-3xl font-light active:bg-blue-700 z-20 select-none"
+        className="fixed bottom-28 right-5 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-3xl font-light active:bg-blue-700 z-20 select-none"
         aria-label="Add flight"
       >
         +
