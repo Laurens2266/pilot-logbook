@@ -22,7 +22,7 @@ except ImportError:
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def time_to_minutes(value) -> int | None:
+def time_to_minutes(value):
     """Convert a datetime.time object to total minutes, or None."""
     if value is None:
         return None
@@ -31,14 +31,14 @@ def time_to_minutes(value) -> int | None:
     return None
 
 
-def format_time(value) -> str | None:
+def format_time(value):
     """Format a datetime.time object as 'HH:MM' string."""
     if isinstance(value, time):
         return f"{value.hour:02d}:{value.minute:02d}"
     return None
 
 
-def format_date(value) -> str | None:
+def format_date(value):
     """Format a datetime object as 'YYYY-MM-DD' string."""
     if isinstance(value, datetime):
         return value.strftime("%Y-%m-%d")
@@ -47,7 +47,7 @@ def format_date(value) -> str | None:
     return None
 
 
-def calc_minutes(start: time | None, end: time | None) -> int | None:
+def calc_minutes(start, end):
     """Calculate duration in minutes between two time objects (same day)."""
     if not isinstance(start, time) or not isinstance(end, time):
         return None
