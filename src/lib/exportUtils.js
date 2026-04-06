@@ -89,10 +89,21 @@ export async function exportPDF(flights) {
     columnStyles: { Comments: { cellWidth: 30 } },
   })
 
-  // Open PDF in a new tab — works on all platforms including iOS
-  // On iOS: shows PDF viewer with its own share/save options
-  // On desktop: opens in browser PDF viewer where you can save
-  const url = URL.createObjectURL(doc.output('blob'))
+  const blob = doc.output('blob')
+
+  // On iOS, use Web Share API → native share sheet → Save to Files works correctly
+  // (blob URL in Safari PDF viewer causes duplicate files when saving)
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+
+  if (isIOS && navigator.share) {
+    const file = new File([blob], 'logbook.pdf', { type: 'application/pdf' })
+    await navigator.share({ files: [file] })
+    return
+  }
+
+  // Desktop: open in new tab (browser PDF viewer)
+  const url = URL.createObjectURL(blob)
   window.open(url)
   setTimeout(() => URL.revokeObjectURL(url), 60000)
 }
