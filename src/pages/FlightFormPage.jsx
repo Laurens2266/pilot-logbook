@@ -199,7 +199,7 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
 
         {/* ── Times ── */}
         <Section title="Flight Times">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
             <Field label="Departure Time" error={errors.flightStart}>
               <input
                 type="time"

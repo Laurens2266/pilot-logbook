@@ -113,14 +113,20 @@ export default function LogbookPage({ flights, onAdd, onEdit, connected, onConne
                       <div className="font-semibold text-slate-900 dark:text-slate-100 text-sm tracking-wide">{flight.registration}</div>
                       <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{flight.model}</div>
                     </td>
-                    <td className="px-3 py-3 whitespace-nowrap">
-                      <div className="text-slate-700 dark:text-slate-300 text-sm">
+                    <td className="px-3 py-3 max-w-[200px]">
+                      <div className="text-slate-700 dark:text-slate-300 text-sm whitespace-nowrap">
                         <span>{flight.from}</span>
                         <span className="mx-1.5 text-slate-300 dark:text-slate-600">→</span>
                         <span>{flight.to}</span>
+                        {flight.crossCountry && (
+                          <span className="ml-2 text-[10px] font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/40 px-1.5 py-0.5 rounded">XC</span>
+                        )}
                       </div>
                       {flight.nameOfPIC && (
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{flight.nameOfPIC}</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 whitespace-nowrap">{flight.nameOfPIC}</div>
+                      )}
+                      {flight.comments && (
+                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 italic truncate">{flight.comments}</div>
                       )}
                     </td>
                     <td className="px-3 py-3 text-right font-mono font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap tabular-nums">
