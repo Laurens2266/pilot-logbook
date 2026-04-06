@@ -3,12 +3,16 @@ import { exportExcel, exportPDF } from '../lib/exportUtils'
 
 export default function SettingsPage({ connected, syncStatus, onConnect, onDisconnect, onSync, flights }) {
   const [exporting, setExporting] = useState(null) // 'excel' | 'pdf' | null
+  const [exportError, setExportError] = useState(null)
 
   async function handleExport(type) {
     setExporting(type)
+    setExportError(null)
     try {
       if (type === 'excel') await exportExcel(flights)
       else                  await exportPDF(flights)
+    } catch (e) {
+      setExportError(e?.message || 'Export failed')
     } finally {
       setExporting(null)
     }
@@ -63,6 +67,7 @@ export default function SettingsPage({ connected, syncStatus, onConnect, onDisco
       <section className="bg-white rounded-xl shadow-sm p-4 space-y-3">
         <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Export</h3>
         <p className="text-sm text-gray-500">{flights.length} flight{flights.length !== 1 ? 's' : ''} in logbook</p>
+        {exportError && <p className="text-red-500 text-sm">{exportError}</p>}
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => handleExport('excel')}
