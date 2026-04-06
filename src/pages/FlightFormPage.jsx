@@ -44,15 +44,21 @@ function detectRole(flight) {
 function Field({ label, error, children }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">{label}</label>
+      <label className="block text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
+        {label}
+      </label>
       {children}
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+      {error && <p className="text-red-500 dark:text-red-400 text-xs mt-1">{error}</p>}
     </div>
   )
 }
 
 const inputCls = (error) =>
-  `w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${error ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'}`
+  `w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 transition-colors ${
+    error
+      ? 'border-red-400 dark:border-red-500'
+      : 'border-slate-200 dark:border-gray-700 placeholder-slate-400 dark:placeholder-slate-500'
+  }`
 
 function TextInput({ field, value, onChange, upper = false, maxLength, placeholder, error }) {
   return (
@@ -64,6 +70,17 @@ function TextInput({ field, value, onChange, upper = false, maxLength, placehold
       placeholder={placeholder}
       className={inputCls(error)}
     />
+  )
+}
+
+// ── Section wrapper ───────────────────────────────────────────────────────────
+
+function Section({ title, children }) {
+  return (
+    <section className="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 p-4 space-y-4">
+      <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{title}</p>
+      {children}
+    </section>
   )
 }
 
@@ -134,32 +151,33 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
     setSaving(false)
   }
 
-  const sectionCls = "bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 space-y-4"
-  const sectionHeaderCls = "text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide"
-
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 dark:bg-gray-950">
+    <div className="h-full overflow-y-auto bg-slate-50 dark:bg-gray-950 scroll-smooth-ios">
+
       {/* Sticky header */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-10 flex-shrink-0">
-        <button onClick={onCancel} className="text-blue-500 font-medium text-sm px-1 py-1">
+      <div className="bg-white dark:bg-gray-900 border-b border-slate-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
+        <button
+          onClick={onCancel}
+          className="text-sky-500 font-medium text-sm px-1 py-1 active:text-sky-700"
+        >
           Cancel
         </button>
-        <h2 className="font-semibold text-gray-900 dark:text-gray-100">{isEdit ? 'Edit Flight' : 'New Flight'}</h2>
+        <h2 className="font-semibold text-slate-900 dark:text-slate-100 text-[15px]">
+          {isEdit ? 'Edit Flight' : 'New Flight'}
+        </h2>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold disabled:opacity-50 active:bg-blue-700"
+          className="bg-sky-500 active:bg-sky-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold disabled:opacity-50 transition-colors"
         >
           {saving ? 'Saving…' : 'Save'}
         </button>
       </div>
 
-      <div className="p-4 space-y-4 pb-10">
+      <div className="p-4 space-y-3 pb-10">
 
         {/* ── Basic Info ── */}
-        <section className={sectionCls}>
-          <p className={sectionHeaderCls}>Basic Info</p>
-
+        <Section title="Basic Info">
           <Field label="Date" error={errors.date}>
             <input
               type="date"
@@ -177,12 +195,10 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
               <TextInput field="model" value={form.model} onChange={set} error={errors.model} />
             </Field>
           </div>
-        </section>
+        </Section>
 
         {/* ── Times ── */}
-        <section className={sectionCls}>
-          <p className={sectionHeaderCls}>Flight Times</p>
-
+        <Section title="Flight Times">
           <div className="grid grid-cols-2 gap-3">
             <Field label="Departure Time" error={errors.flightStart}>
               <input
@@ -203,20 +219,20 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">
+            <label className="block text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
               Total Flight Time
             </label>
-            <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-mono font-semibold text-gray-800 dark:text-gray-100">
+            <div className="px-3 py-2.5 bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg text-sm font-mono font-semibold text-slate-800 dark:text-slate-100 tabular-nums">
               {form.totalFlightTime ? min2hhmm(form.totalFlightTime) : '—'}
             </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Auto-calculated from departure / arrival time</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+              Auto-calculated from departure / arrival time
+            </p>
           </div>
-        </section>
+        </Section>
 
         {/* ── Route ── */}
-        <section className={sectionCls}>
-          <p className={sectionHeaderCls}>Route</p>
-
+        <Section title="Route">
           <div className="grid grid-cols-2 gap-3">
             <Field label="Departure (ICAO)" error={errors.from}>
               <TextInput field="from" value={form.from} onChange={set} upper maxLength={4} error={errors.from} />
@@ -240,68 +256,69 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
               <select
                 value={form.flightRules}
                 onChange={e => set('flightRules', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full px-3 py-2.5 border border-slate-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 transition-colors"
               >
                 <option value="VFR">VFR</option>
                 <option value="IFR">IFR</option>
               </select>
             </Field>
           </div>
-        </section>
+        </Section>
 
         {/* ── Crew & Role ── */}
-        <section className={sectionCls}>
-          <p className={sectionHeaderCls}>Crew & Role</p>
-
+        <Section title="Crew & Role">
           <Field label="Name of PIC" error={errors.nameOfPIC}>
             <TextInput field="nameOfPIC" value={form.nameOfPIC} onChange={set} error={errors.nameOfPIC} />
           </Field>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">My Role</label>
+            <label className="block text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
+              My Role
+            </label>
             <div className="grid grid-cols-4 gap-2">
               {ROLES.map(r => (
                 <button
                   key={r.key}
                   type="button"
                   onClick={() => { setRole(r.key); setErrors(e => ({ ...e, role: null })) }}
-                  className={`py-2.5 rounded-lg text-sm font-semibold border transition-colors
+                  className={`py-2.5 rounded-lg text-sm font-semibold border transition-all
                     ${role === r.key
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 active:bg-gray-50 dark:active:bg-gray-600'}`}
+                      ? 'bg-sky-500 text-white border-sky-500 shadow-sm shadow-sky-500/25'
+                      : 'bg-white dark:bg-gray-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-gray-700 active:bg-slate-50 dark:active:bg-gray-700'}`}
                 >
                   {r.label}
                 </button>
               ))}
             </div>
-            {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role}</p>}
+            {errors.role && <p className="text-red-500 dark:text-red-400 text-xs mt-1.5">{errors.role}</p>}
             {role && form.totalFlightTime && (
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                {min2hhmm(form.totalFlightTime)} will be logged as {ROLES.find(r => r.key === role)?.label}
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
+                <span className="font-mono tabular-nums">{min2hhmm(form.totalFlightTime)}</span>
+                {' '}will be logged as {ROLES.find(r => r.key === role)?.label}
               </p>
             )}
           </div>
-        </section>
+        </Section>
 
         {/* ── Additional ── */}
-        <section className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 space-y-3">
-          <p className={sectionHeaderCls}>Additional</p>
+        <section className="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 p-4 space-y-3">
+          <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Additional</p>
 
           {[
             { id: 'cc-check',    field: 'crossCountry', label: 'Cross Country' },
             { id: 'night-check', field: 'night',        label: 'Night' },
             { id: 'se-check',    field: 'se',           label: 'Single Engine (SE)' },
           ].map(({ id, field, label }) => (
-            <div key={id} className="flex items-center gap-3">
+            <label key={id} htmlFor={id} className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 id={id}
                 checked={!!form[field]}
                 onChange={e => set(field, e.target.checked)}
-                className="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                className="w-5 h-5 rounded border-slate-300 dark:border-gray-600 text-sky-500 focus:ring-sky-500 focus:ring-offset-0"
               />
-              <label htmlFor={id} className="text-sm font-medium text-gray-700 dark:text-gray-200">{label}</label>
-            </div>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{label}</span>
+            </label>
           ))}
 
           <Field label="Comments">
@@ -310,7 +327,7 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
               onChange={e => set('comments', e.target.value)}
               rows={3}
               placeholder="Optional remarks…"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              className="w-full px-3 py-2.5 border border-slate-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent resize-none bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-colors"
             />
           </Field>
         </section>
@@ -322,20 +339,20 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
               <button
                 type="button"
                 onClick={() => setConfirmDelete(true)}
-                className="w-full py-3 text-red-600 border border-red-200 dark:border-red-800 rounded-xl text-sm font-medium bg-white dark:bg-gray-800 active:bg-red-50 dark:active:bg-red-950"
+                className="w-full py-3 text-red-500 dark:text-red-400 border border-slate-200 dark:border-gray-800 rounded-xl text-sm font-medium bg-white dark:bg-gray-900 active:bg-red-50 dark:active:bg-red-950/30 transition-colors"
               >
                 Delete Flight
               </button>
             ) : (
-              <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl p-4 space-y-3">
-                <p className="text-red-700 dark:text-red-300 text-sm font-medium text-center">
+              <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl p-4 space-y-3">
+                <p className="text-red-600 dark:text-red-400 text-sm font-medium text-center">
                   Delete this flight permanently?
                 </p>
                 <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={() => setConfirmDelete(false)}
-                    className="flex-1 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+                    className="flex-1 py-2.5 border border-slate-200 dark:border-gray-700 rounded-lg text-sm font-medium bg-white dark:bg-gray-800 text-slate-700 dark:text-slate-200 active:bg-slate-50 dark:active:bg-gray-700 transition-colors"
                   >
                     Cancel
                   </button>
@@ -343,7 +360,7 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
                     type="button"
                     onClick={handleDelete}
                     disabled={saving}
-                    className="flex-1 py-2.5 bg-red-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50"
+                    className="flex-1 py-2.5 bg-red-500 active:bg-red-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50 transition-colors"
                   >
                     Delete
                   </button>

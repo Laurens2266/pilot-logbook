@@ -19,3 +19,8 @@ html, body, #root {
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+/* Smooth scrolling for logbook table */
+.scroll-smooth-ios {
+  -webkit-overflow-scrolling: touch;
+}
