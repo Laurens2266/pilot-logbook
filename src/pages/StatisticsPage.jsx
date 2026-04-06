@@ -27,8 +27,8 @@ export default function StatisticsPage({ flights }) {
     const dual     = sum('dual')
     const coPilot  = sum('coPilot')
     const fi       = sum('fi')
-    const cc       = sum('crossCountry')
-    const night    = sum('night')
+    const cc       = flights.filter(f => f.crossCountry).reduce((acc, f) => acc + (f.totalFlightTime || 0), 0)
+    const night    = flights.filter(f => f.night).reduce((acc, f) => acc + (f.totalFlightTime || 0), 0)
     const landings = sum('landings')
     const se       = flights.filter(f => f.se).reduce((acc, f) => acc + (f.totalFlightTime || 0), 0)
 
@@ -144,16 +144,20 @@ export default function StatisticsPage({ flights }) {
       {/* ── Monthly chart ── */}
       <section className="bg-white rounded-xl shadow-sm p-4">
         <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Hours per Month (last 12)</h3>
-        <div className="flex items-end gap-1" style={{ height: 80 }}>
+        <div className="flex items-end gap-1" style={{ height: 110 }}>
           {s.monthly.map(m => (
             <div key={m.key} className="flex-1 flex flex-col items-center justify-end gap-0.5">
+              {m.mins > 0 && (
+                <span className="text-gray-600 font-mono leading-none mb-0.5" style={{ fontSize: 9 }}>
+                  {min2hhmm(m.mins)}
+                </span>
+              )}
               <div
                 className="w-full bg-blue-500 rounded-t transition-all"
                 style={{ height: `${Math.round((m.mins / maxBar) * 72)}px`, minHeight: m.mins > 0 ? 3 : 0 }}
-                title={`${m.label}${m.year ? ' ' + m.year : ''}: ${min2hhmm(m.mins) || '0:00'}`}
               />
               <span className="text-xs text-gray-400 leading-none">{m.label}</span>
-              {m.year && <span className="text-xs text-gray-300 leading-none">{m.year}</span>}
+              {m.year && <span className="text-gray-300 leading-none" style={{ fontSize: 9 }}>{m.year}</span>}
             </div>
           ))}
         </div>

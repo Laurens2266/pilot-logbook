@@ -44,27 +44,6 @@ export default function SettingsPage({ connected, syncStatus, onConnect, onDisco
         )}
       </section>
 
-      {/* ── Import tip ── */}
-      <section className="bg-white rounded-xl shadow-sm p-4 space-y-2">
-        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Importing existing data</h3>
-        <p className="text-sm text-gray-600">
-          Run <span className="font-mono bg-gray-100 px-1 rounded">python3 scripts/import_excel.py</span> to
-          convert your Excel logbook to <span className="font-mono bg-gray-100 px-1 rounded">logbook.json</span>.
-        </p>
-        <p className="text-sm text-gray-600">
-          Then upload that file to your Dropbox at{' '}
-          <span className="font-mono bg-gray-100 px-1 rounded text-xs">Apps/PilotLogbook/logbook.json</span>{' '}
-          and tap <strong>Sync Now</strong>.
-        </p>
-      </section>
-
-      {/* ── About ── */}
-      <section className="bg-white rounded-xl shadow-sm p-4 space-y-1">
-        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">About</h3>
-        <p className="text-sm font-semibold text-gray-900">Pilot Logbook v1.0</p>
-        <p className="text-sm text-gray-500">Personal flight logbook — data stored in your own Dropbox.</p>
-      </section>
-
     </div>
   )
 }

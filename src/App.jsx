@@ -187,7 +187,7 @@ export default function App() {
       {/* Page content */}
       <main className="flex-1 overflow-hidden">
         {page === 'logbook' && (
-          <LogbookPage flights={flights} onAdd={handleAddFlight} onEdit={handleEditFlight} />
+          <LogbookPage flights={flights} onAdd={handleAddFlight} onEdit={handleEditFlight} connected={connected} onConnect={startOAuthFlow} />
         )}
         {page === 'form' && (
           <FlightFormPage

@@ -12,8 +12,8 @@ const EMPTY_FLIGHT = {
   to: '',
   landings: 1,
   nameOfPIC: '',
-  crossCountry: null,
-  night: null,
+  crossCountry: false,
+  night: false,
   se: true,
   flightRules: 'VFR',
   pic: null,
@@ -23,32 +23,20 @@ const EMPTY_FLIGHT = {
   comments: '',
 }
 
-// Uncontrolled-friendly duration text input
-// Stores minutes in parent; shows/edits as "H:mm" text locally
-function DurationInput({ value, onChange, placeholder = '0:00' }) {
-  const [text, setText] = useState(() =>
-    value !== null && value !== undefined ? min2hhmm(value) : ''
-  )
+const ROLES = [
+  { key: 'pic',     label: 'PIC' },
+  { key: 'coPilot', label: 'Co-Pilot' },
+  { key: 'dual',    label: 'Dual' },
+  { key: 'fi',      label: 'FI' },
+]
 
-  function handleBlur() {
-    const trimmed = text.trim()
-    if (!trimmed) { onChange(null); setText(''); return }
-    const mins = hhmm2min(trimmed)
-    onChange(mins ?? null)
-    setText(mins !== null ? min2hhmm(mins) : '')
-  }
-
-  return (
-    <input
-      type="text"
-      inputMode="decimal"
-      value={text}
-      onChange={e => setText(e.target.value)}
-      onBlur={handleBlur}
-      placeholder={placeholder}
-      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
-  )
+function detectRole(flight) {
+  if (!flight) return null
+  if (flight.pic)     return 'pic'
+  if (flight.coPilot) return 'coPilot'
+  if (flight.dual)    return 'dual'
+  if (flight.fi)      return 'fi'
+  return null
 }
 
 // ── Shared field components (defined outside to avoid remount on re-render) ───
@@ -63,16 +51,14 @@ function Field({ label, error, children }) {
   )
 }
 
-function TextInput({ field, value, onChange, upper = false, list, maxLength, placeholder, inputMode, error }) {
+function TextInput({ field, value, onChange, upper = false, maxLength, placeholder, error }) {
   return (
     <input
       type="text"
       value={value ?? ''}
       onChange={e => onChange(field, upper ? e.target.value.toUpperCase() : e.target.value)}
-      list={list}
       maxLength={maxLength}
       placeholder={placeholder}
-      inputMode={inputMode}
       className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500
         ${error ? 'border-red-400' : 'border-gray-300'}`}
     />
@@ -84,6 +70,7 @@ function TextInput({ field, value, onChange, upper = false, list, maxLength, pla
 export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
   const isEdit = !!flight?.id
   const [form, setForm] = useState(flight ? { ...EMPTY_FLIGHT, ...flight } : { ...EMPTY_FLIGHT })
+  const [role, setRole] = useState(() => detectRole(flight))
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -114,6 +101,7 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
     if (!form.to   || form.to.length   < 3)      e.to           = '3–4 letter ICAO code'
     if (!form.nameOfPIC)                         e.nameOfPIC    = 'Required'
     if (form.landings === '' || form.landings === null) e.landings = 'Required'
+    if (!role)                                   e.role         = 'Select your role'
     return e
   }
 
@@ -122,12 +110,17 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setSaving(true)
     try {
+      const roleFields = { pic: null, coPilot: null, dual: null, fi: null }
+      if (role) roleFields[role] = form.totalFlightTime
       await onSave({
         ...form,
+        ...roleFields,
         registration: form.registration.toUpperCase(),
         from:         form.from.toUpperCase(),
         to:           form.to.toUpperCase(),
         landings:     Number(form.landings),
+        crossCountry: !!form.crossCountry,
+        night:        !!form.night,
       })
     } finally {
       setSaving(false)
@@ -175,11 +168,10 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Registration" error={errors.registration}>
-              <TextInput field="registration" value={form.registration} onChange={set} upper placeholder="PH-ELW" error={errors.registration} />
+              <TextInput field="registration" value={form.registration} onChange={set} upper error={errors.registration} />
             </Field>
-
             <Field label="Model" error={errors.model}>
-              <TextInput field="model" value={form.model} onChange={set} placeholder="S200" error={errors.model} />
+              <TextInput field="model" value={form.model} onChange={set} error={errors.model} />
             </Field>
           </div>
         </section>
@@ -198,7 +190,6 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
                   ${errors.flightStart ? 'border-red-400' : 'border-gray-300'}`}
               />
             </Field>
-
             <Field label="Arrival Time" error={errors.flightEnd}>
               <input
                 type="time"
@@ -227,10 +218,10 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Departure (ICAO)" error={errors.from}>
-              <TextInput field="from" value={form.from} onChange={set} upper maxLength={4} placeholder="EHTE" error={errors.from} />
+              <TextInput field="from" value={form.from} onChange={set} upper maxLength={4} error={errors.from} />
             </Field>
             <Field label="Destination (ICAO)" error={errors.to}>
-              <TextInput field="to" value={form.to} onChange={set} upper maxLength={4} placeholder="EHTE" error={errors.to} />
+              <TextInput field="to" value={form.to} onChange={set} upper maxLength={4} error={errors.to} />
             </Field>
           </div>
 
@@ -245,7 +236,6 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
                   ${errors.landings ? 'border-red-400' : 'border-gray-300'}`}
               />
             </Field>
-
             <Field label="Flight Rules">
               <select
                 value={form.flightRules}
@@ -264,36 +254,59 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Crew & Role</p>
 
           <Field label="Name of PIC" error={errors.nameOfPIC}>
-            <TextInput field="nameOfPIC" value={form.nameOfPIC} onChange={set} placeholder="L. Pelgrom" error={errors.nameOfPIC} />
+            <TextInput field="nameOfPIC" value={form.nameOfPIC} onChange={set} error={errors.nameOfPIC} />
           </Field>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="PIC time">
-              <DurationInput value={form.pic} onChange={v => set('pic', v)} />
-            </Field>
-            <Field label="Co-Pilot">
-              <DurationInput value={form.coPilot} onChange={v => set('coPilot', v)} />
-            </Field>
-            <Field label="Dual (with instructor)">
-              <DurationInput value={form.dual} onChange={v => set('dual', v)} />
-            </Field>
-            <Field label="Flight Instructor">
-              <DurationInput value={form.fi} onChange={v => set('fi', v)} />
-            </Field>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">My Role</label>
+            <div className="grid grid-cols-4 gap-2">
+              {ROLES.map(r => (
+                <button
+                  key={r.key}
+                  type="button"
+                  onClick={() => { setRole(r.key); setErrors(e => ({ ...e, role: null })) }}
+                  className={`py-2.5 rounded-lg text-sm font-semibold border transition-colors
+                    ${role === r.key
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-700 border-gray-300 active:bg-gray-50'}`}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+            {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role}</p>}
+            {role && form.totalFlightTime && (
+              <p className="text-xs text-gray-400 mt-1">
+                {min2hhmm(form.totalFlightTime)} will be logged as {ROLES.find(r => r.key === role)?.label}
+              </p>
+            )}
           </div>
         </section>
 
         {/* ── Additional ── */}
-        <section className="bg-white rounded-xl shadow-sm p-4 space-y-4">
+        <section className="bg-white rounded-xl shadow-sm p-4 space-y-3">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Additional</p>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Cross Country">
-              <DurationInput value={form.crossCountry} onChange={v => set('crossCountry', v)} />
-            </Field>
-            <Field label="Night">
-              <DurationInput value={form.night} onChange={v => set('night', v)} />
-            </Field>
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="cc-check"
+              checked={!!form.crossCountry}
+              onChange={e => set('crossCountry', e.target.checked)}
+              className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="cc-check" className="text-sm font-medium text-gray-700">Cross Country</label>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="night-check"
+              checked={!!form.night}
+              onChange={e => set('night', e.target.checked)}
+              className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="night-check" className="text-sm font-medium text-gray-700">Night</label>
           </div>
 
           <div className="flex items-center gap-3">
@@ -304,9 +317,7 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
               onChange={e => set('se', e.target.checked)}
               className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <label htmlFor="se-check" className="text-sm font-medium text-gray-700">
-              Single Engine (SE)
-            </label>
+            <label htmlFor="se-check" className="text-sm font-medium text-gray-700">Single Engine (SE)</label>
           </div>
 
           <Field label="Comments">

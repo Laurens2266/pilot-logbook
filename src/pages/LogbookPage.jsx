@@ -9,8 +9,28 @@ function roleLabel(f) {
   return { label: '—', cls: 'bg-gray-100 text-gray-500' }
 }
 
-export default function LogbookPage({ flights, onAdd, onEdit }) {
+export default function LogbookPage({ flights, onAdd, onEdit, connected, onConnect }) {
   const [search, setSearch] = useState('')
+
+  if (!connected) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full px-8 text-center gap-5">
+        <svg className="w-16 h-16 text-gray-300" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5v-9m0 0-3 3m3-3 3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 5.25 5.25 0 011.524 10.32A4.5 4.5 0 0117.25 19.5H6.75z" />
+        </svg>
+        <div>
+          <p className="text-lg font-semibold text-gray-700">Connect Dropbox</p>
+          <p className="text-sm text-gray-500 mt-1">Connect your Dropbox account to access and sync your logbook.</p>
+        </div>
+        <button
+          onClick={onConnect}
+          className="bg-blue-600 text-white px-6 py-3 rounded-xl text-sm font-semibold active:bg-blue-700"
+        >
+          Connect Dropbox
+        </button>
+      </div>
+    )
+  }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
