@@ -210,7 +210,7 @@ export default function App() {
       </main>
 
       {/* Bottom navigation */}
-      {page !== 'form' && (
+      {page !== 'form' && connected && (
         <nav className="bg-white border-t border-gray-200 flex flex-shrink-0 pb-safe">
           {navItems.map(({ id, label, Icon }) => (
             <button
