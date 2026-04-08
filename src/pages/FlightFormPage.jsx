@@ -77,7 +77,7 @@ function TextInput({ field, value, onChange, upper = false, maxLength, placehold
 
 function Section({ title, children }) {
   return (
-    <section className="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 p-4 space-y-4 overflow-hidden">
+    <section className="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 p-4 space-y-4">
       <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{title}</p>
       {children}
     </section>
@@ -301,7 +301,7 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
         </Section>
 
         {/* ── Additional ── */}
-        <section className="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 p-4 space-y-3 overflow-hidden">
+        <section className="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 p-4 space-y-3">
           <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Additional</p>
 
           {[

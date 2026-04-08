@@ -25,6 +25,14 @@ html, body, #root {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Prevent iOS date/time inputs from overflowing their container */
+input[type="date"],
+input[type="time"] {
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 /* FAB clearance above bottom nav + safe area */
 .bottom-fab {
   bottom: calc(env(safe-area-inset-bottom) + 72px);
