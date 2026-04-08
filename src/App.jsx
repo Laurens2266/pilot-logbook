@@ -232,6 +232,7 @@ export default function App() {
         {page === 'form' && (
           <FlightFormPage
             flight={editingFlight}
+            flights={flights}
             onSave={handleSaveFlight}
             onDelete={handleDeleteFlight}
             onCancel={() => setPage('logbook')}

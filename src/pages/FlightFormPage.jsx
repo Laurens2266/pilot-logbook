@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { hhmm2min, min2hhmm, today } from '../lib/timeUtils'
 
 const EMPTY_FLIGHT = {
@@ -39,7 +39,7 @@ function detectRole(flight) {
   return null
 }
 
-// ── Shared field components (defined outside to avoid remount on re-render) ───
+// ── Shared field components ───────────────────────────────────────────────────
 
 function Field({ label, error, children }) {
   return (
@@ -60,16 +60,59 @@ const inputCls = (error) =>
       : 'border-slate-200 dark:border-gray-700 placeholder-slate-400 dark:placeholder-slate-500'
   }`
 
-function TextInput({ field, value, onChange, upper = false, maxLength, placeholder, error }) {
+// ── Autocomplete input ────────────────────────────────────────────────────────
+
+function AutocompleteInput({ field, value, onChange, suggestions, upper = false, maxLength, placeholder, error }) {
+  const [open, setOpen] = useState(false)
+
+  const q = (value ?? '').toLowerCase()
+  const filtered = useMemo(() =>
+    suggestions.filter(s => !q || s.toLowerCase().includes(q)).slice(0, 8),
+    [suggestions, q]
+  )
+
+  function handleChange(e) {
+    const v = upper ? e.target.value.toUpperCase() : e.target.value
+    onChange(field, v)
+  }
+
+  function select(s) {
+    onChange(field, upper ? s.toUpperCase() : s)
+    setOpen(false)
+  }
+
   return (
-    <input
-      type="text"
-      value={value ?? ''}
-      onChange={e => onChange(field, upper ? e.target.value.toUpperCase() : e.target.value)}
-      maxLength={maxLength}
-      placeholder={placeholder}
-      className={inputCls(error)}
-    />
+    <div className="relative">
+      <input
+        type="text"
+        value={value ?? ''}
+        onChange={handleChange}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        maxLength={maxLength}
+        placeholder={placeholder}
+        className={inputCls(error)}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize={upper ? 'characters' : 'words'}
+        spellCheck={false}
+      />
+      {open && filtered.length > 0 && (
+        <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden max-h-44 overflow-y-auto">
+          {filtered.map(s => (
+            <button
+              key={s}
+              type="button"
+              onMouseDown={e => e.preventDefault()}
+              onClick={() => select(s)}
+              className="w-full text-left px-3 py-3 text-sm text-slate-700 dark:text-slate-200 active:bg-sky-50 dark:active:bg-sky-950/30 border-b border-slate-100 dark:border-gray-700 last:border-0"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -86,7 +129,7 @@ function Section({ title, children }) {
 
 // ── Form ──────────────────────────────────────────────────────────────────────
 
-export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
+export default function FlightFormPage({ flight, flights = [], onSave, onDelete, onCancel }) {
   const isEdit = !!flight?.id
   const [form, setForm] = useState(flight ? { ...EMPTY_FLIGHT, ...flight } : { ...EMPTY_FLIGHT })
   const [role, setRole] = useState(() => detectRole(flight))
@@ -94,12 +137,27 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
+  // Suggestion lists derived from previous flights
+  const suggestions = useMemo(() => {
+    const uniq = (arr) => [...new Set(arr.filter(Boolean))].sort()
+    const airports = uniq([...flights.map(f => f.from), ...flights.map(f => f.to)])
+    return {
+      airports,
+      models:  uniq(flights.map(f => f.model)),
+      pics:    uniq(flights.map(f => f.nameOfPIC)),
+    }
+  }, [flights])
+
+  // Auto-calculate total flight time; clear it when times are invalid
   useEffect(() => {
     if (!form.flightStart || !form.flightEnd) return
     const s = hhmm2min(form.flightStart)
     const e = hhmm2min(form.flightEnd)
     if (s !== null && e !== null && e > s) {
       setForm(f => ({ ...f, totalFlightTime: e - s }))
+      setErrors(err => ({ ...err, flightEnd: null }))
+    } else if (s !== null && e !== null) {
+      setForm(f => ({ ...f, totalFlightTime: null }))
     }
   }, [form.flightStart, form.flightEnd])
 
@@ -115,6 +173,11 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
     if (!form.model)                             e.model        = 'Required'
     if (!form.flightStart)                       e.flightStart  = 'Required'
     if (!form.flightEnd)                         e.flightEnd    = 'Required'
+    if (form.flightStart && form.flightEnd) {
+      const s = hhmm2min(form.flightStart)
+      const e2 = hhmm2min(form.flightEnd)
+      if (s !== null && e2 !== null && e2 <= s)  e.flightEnd    = 'Must be after departure time'
+    }
     if (!form.from || form.from.length < 3)      e.from         = '3–4 letter ICAO code'
     if (!form.to   || form.to.length   < 3)      e.to           = '3–4 letter ICAO code'
     if (!form.nameOfPIC)                         e.nameOfPIC    = 'Required'
@@ -122,6 +185,13 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
     if (!role)                                   e.role         = 'Select your role'
     return e
   }
+
+  // Live time error shown below arrival field
+  const timeOrderError = form.flightStart && form.flightEnd && (() => {
+    const s = hhmm2min(form.flightStart)
+    const e = hhmm2min(form.flightEnd)
+    return s !== null && e !== null && e <= s
+  })()
 
   async function handleSave() {
     const errs = validate()
@@ -189,10 +259,24 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Registration" error={errors.registration}>
-              <TextInput field="registration" value={form.registration} onChange={set} upper error={errors.registration} />
+              <input
+                type="text"
+                value={form.registration ?? ''}
+                onChange={e => set('registration', e.target.value.toUpperCase())}
+                className={inputCls(errors.registration)}
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+              />
             </Field>
             <Field label="Model" error={errors.model}>
-              <TextInput field="model" value={form.model} onChange={set} error={errors.model} />
+              <AutocompleteInput
+                field="model"
+                value={form.model}
+                onChange={set}
+                suggestions={suggestions.models}
+                error={errors.model}
+              />
             </Field>
           </div>
         </Section>
@@ -208,12 +292,15 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
                 className={inputCls(errors.flightStart)}
               />
             </Field>
-            <Field label="Arrival Time" error={errors.flightEnd}>
+            <Field
+              label="Arrival Time"
+              error={errors.flightEnd || (timeOrderError ? 'Must be after departure time' : null)}
+            >
               <input
                 type="time"
                 value={form.flightEnd}
                 onChange={e => set('flightEnd', e.target.value)}
-                className={inputCls(errors.flightEnd)}
+                className={inputCls(errors.flightEnd || timeOrderError)}
               />
             </Field>
           </div>
@@ -235,10 +322,26 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
         <Section title="Route">
           <div className="grid grid-cols-2 gap-3">
             <Field label="Departure (ICAO)" error={errors.from}>
-              <TextInput field="from" value={form.from} onChange={set} upper maxLength={4} error={errors.from} />
+              <AutocompleteInput
+                field="from"
+                value={form.from}
+                onChange={set}
+                suggestions={suggestions.airports}
+                upper
+                maxLength={4}
+                error={errors.from}
+              />
             </Field>
             <Field label="Destination (ICAO)" error={errors.to}>
-              <TextInput field="to" value={form.to} onChange={set} upper maxLength={4} error={errors.to} />
+              <AutocompleteInput
+                field="to"
+                value={form.to}
+                onChange={set}
+                suggestions={suggestions.airports}
+                upper
+                maxLength={4}
+                error={errors.to}
+              />
             </Field>
           </div>
 
@@ -268,7 +371,13 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
         {/* ── Crew & Role ── */}
         <Section title="Crew & Role">
           <Field label="Name of PIC" error={errors.nameOfPIC}>
-            <TextInput field="nameOfPIC" value={form.nameOfPIC} onChange={set} error={errors.nameOfPIC} />
+            <AutocompleteInput
+              field="nameOfPIC"
+              value={form.nameOfPIC}
+              onChange={set}
+              suggestions={suggestions.pics}
+              error={errors.nameOfPIC}
+            />
           </Field>
 
           <div>
