@@ -54,7 +54,7 @@ function Field({ label, error, children }) {
 }
 
 const inputCls = (error) =>
-  `w-full px-3 py-2.5 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 transition-colors ${
+  `w-full min-w-0 px-3 py-2.5 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 transition-colors ${
     error
       ? 'border-red-400 dark:border-red-500'
       : 'border-slate-200 dark:border-gray-700 placeholder-slate-400 dark:placeholder-slate-500'
@@ -77,7 +77,7 @@ function TextInput({ field, value, onChange, upper = false, maxLength, placehold
 
 function Section({ title, children }) {
   return (
-    <section className="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 p-4 space-y-4">
+    <section className="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 p-4 space-y-4 overflow-hidden">
       <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{title}</p>
       {children}
     </section>
@@ -301,7 +301,7 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
         </Section>
 
         {/* ── Additional ── */}
-        <section className="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 p-4 space-y-3">
+        <section className="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 p-4 space-y-3 overflow-hidden">
           <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Additional</p>
 
           {[
