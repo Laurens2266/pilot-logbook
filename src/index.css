@@ -34,7 +34,7 @@ input[type="time"] {
   font-size: 0.875rem;
 }
 
-/* FAB clearance above bottom nav + safe area */
+/* FAB clearance above bottom nav + totals bar + safe area */
 .bottom-fab {
-  bottom: calc(env(safe-area-inset-bottom) + 72px);
+  bottom: calc(env(safe-area-inset-bottom) + 116px);
 }
