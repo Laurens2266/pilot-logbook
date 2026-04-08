@@ -26,11 +26,13 @@ html, body, #root {
 }
 
 /* Remove iOS native widget chrome so date/time inputs respect width: 100%.
-   The native picker popup still opens on tap. */
+   The native picker popup still opens on tap. min-height prevents the
+   empty-state height collapse before a value is selected. */
 input[type="date"],
 input[type="time"] {
   -webkit-appearance: none;
   appearance: none;
+  min-height: 2.875rem;
 }
 
 /* FAB clearance above bottom nav + totals bar + safe area */
