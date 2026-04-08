@@ -25,12 +25,13 @@ html, body, #root {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Prevent iOS date/time inputs from overflowing their container */
+/* Date/time inputs use a native picker (no keyboard) so they don't
+   trigger iOS auto-zoom — keep them at text-sm to avoid overflow */
 input[type="date"],
 input[type="time"] {
+  font-size: 0.875rem;
   max-width: 100%;
   min-width: 0;
-  box-sizing: border-box;
 }
 
 /* FAB clearance above bottom nav + safe area */
