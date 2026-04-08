@@ -25,13 +25,13 @@ html, body, #root {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Date/time inputs use a native picker (no keyboard) so they don't
-   trigger iOS auto-zoom — keep them at text-sm to avoid overflow */
+/* Remove iOS native widget chrome so date/time inputs respect width: 100%.
+   The native picker popup still opens on tap. */
 input[type="date"],
 input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
   font-size: 0.875rem;
-  max-width: 100%;
-  min-width: 0;
 }
 
 /* FAB clearance above bottom nav + safe area */
