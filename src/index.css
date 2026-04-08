@@ -24,3 +24,8 @@ html, body, #root {
 .scroll-smooth-ios {
   -webkit-overflow-scrolling: touch;
 }
+
+/* FAB clearance above bottom nav + safe area */
+.bottom-fab {
+  bottom: calc(env(safe-area-inset-bottom) + 72px);
+}

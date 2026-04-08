@@ -54,7 +54,7 @@ function Field({ label, error, children }) {
 }
 
 const inputCls = (error) =>
-  `w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 transition-colors ${
+  `w-full px-3 py-2.5 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 transition-colors ${
     error
       ? 'border-red-400 dark:border-red-500'
       : 'border-slate-200 dark:border-gray-700 placeholder-slate-400 dark:placeholder-slate-500'
@@ -256,7 +256,7 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
               <select
                 value={form.flightRules}
                 onChange={e => set('flightRules', e.target.value)}
-                className="w-full px-3 py-2.5 border border-slate-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 transition-colors"
+                className="w-full px-3 py-2.5 border border-slate-200 dark:border-gray-700 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 transition-colors"
               >
                 <option value="VFR">VFR</option>
                 <option value="IFR">IFR</option>
@@ -275,13 +275,13 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
             <label className="block text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
               My Role
             </label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {ROLES.map(r => (
                 <button
                   key={r.key}
                   type="button"
                   onClick={() => { setRole(r.key); setErrors(e => ({ ...e, role: null })) }}
-                  className={`py-2.5 rounded-lg text-sm font-semibold border transition-all
+                  className={`py-3 rounded-lg text-sm font-semibold border transition-all
                     ${role === r.key
                       ? 'bg-sky-500 text-white border-sky-500 shadow-sm shadow-sky-500/25'
                       : 'bg-white dark:bg-gray-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-gray-700 active:bg-slate-50 dark:active:bg-gray-700'}`}
@@ -327,7 +327,7 @@ export default function FlightFormPage({ flight, onSave, onDelete, onCancel }) {
               onChange={e => set('comments', e.target.value)}
               rows={3}
               placeholder="Optional remarks…"
-              className="w-full px-3 py-2.5 border border-slate-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent resize-none bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-colors"
+              className="w-full px-3 py-2.5 border border-slate-200 dark:border-gray-700 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent resize-none bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-colors"
             />
           </Field>
         </section>

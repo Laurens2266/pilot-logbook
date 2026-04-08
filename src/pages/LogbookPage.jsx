@@ -67,7 +67,7 @@ export default function LogbookPage({ flights, onAdd, onEdit, connected, onConne
         </div>
       </div>
 
-      {/* Table */}
+      {/* List / Table */}
       <div className="flex-1 overflow-auto scroll-smooth-ios bg-white dark:bg-gray-950">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-400 px-6 gap-4">
@@ -86,65 +86,119 @@ export default function LogbookPage({ flights, onAdd, onEdit, connected, onConne
             </div>
           </div>
         ) : (
-          <table className="w-full text-sm min-w-[560px]">
-            <thead className="bg-slate-50 dark:bg-gray-900 sticky top-0 z-10 border-b border-slate-200 dark:border-gray-800">
-              <tr>
-                <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Date</th>
-                <th className="text-left px-3 py-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Aircraft</th>
-                <th className="text-left px-3 py-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Route</th>
-                <th className="text-right px-3 py-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Time</th>
-                <th className="text-center px-3 py-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Role</th>
-                <th className="text-center px-4 py-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Ldg</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-gray-800">
+          <>
+            {/* ── Card list — iPhone / small screens ── */}
+            <div className="md:hidden divide-y divide-slate-100 dark:divide-gray-800">
               {filtered.map((flight) => {
                 const role = roleLabel(flight)
                 return (
-                  <tr
+                  <div
                     key={flight.id}
                     onClick={() => onEdit(flight)}
-                    className="cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-gray-900 active:bg-sky-50 dark:active:bg-sky-950/30"
+                    className="px-4 py-3 cursor-pointer active:bg-sky-50 dark:active:bg-sky-950/30"
                   >
-                    <td className="px-4 py-3 whitespace-nowrap text-slate-500 dark:text-slate-400 text-xs tabular-nums">
-                      {fmtDate(flight.date)}
-                    </td>
-                    <td className="px-3 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-slate-900 dark:text-slate-100 text-sm tracking-wide">{flight.registration}</div>
-                      <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{flight.model}</div>
-                    </td>
-                    <td className="px-3 py-3 max-w-[200px]">
-                      <div className="text-slate-700 dark:text-slate-300 text-sm whitespace-nowrap">
-                        <span>{flight.from}</span>
-                        <span className="mx-1.5 text-slate-300 dark:text-slate-600">→</span>
-                        <span>{flight.to}</span>
-                        {flight.crossCountry && (
-                          <span className="ml-2 text-[10px] font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/40 px-1.5 py-0.5 rounded">XC</span>
-                        )}
+                    {/* Row 1: date · role · time */}
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-slate-400 dark:text-slate-500 tabular-nums">{fmtDate(flight.date)}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold tracking-wide ${role.cls}`}>
+                          {role.label}
+                        </span>
+                        <span className="font-mono font-semibold text-slate-900 dark:text-slate-100 text-sm tabular-nums">
+                          {min2hhmm(flight.totalFlightTime)}
+                        </span>
                       </div>
-                      {flight.nameOfPIC && (
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 whitespace-nowrap">{flight.nameOfPIC}</div>
+                    </div>
+                    {/* Row 2: aircraft · route */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-semibold text-slate-900 dark:text-slate-100 tracking-wide">{flight.registration}</span>
+                      <span className="text-slate-300 dark:text-slate-600 text-xs">·</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500">{flight.model}</span>
+                      <span className="text-slate-200 dark:text-slate-700 text-xs mx-0.5">|</span>
+                      <span className="text-slate-700 dark:text-slate-300">{flight.from}</span>
+                      <span className="text-slate-300 dark:text-slate-600 text-xs">→</span>
+                      <span className="text-slate-700 dark:text-slate-300">{flight.to}</span>
+                      {flight.crossCountry && (
+                        <span className="text-[10px] font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/40 px-1.5 py-0.5 rounded">XC</span>
                       )}
-                      {flight.comments && (
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 italic truncate">{flight.comments}</div>
+                      {flight.landings !== 1 && (
+                        <span className="text-xs text-slate-400 dark:text-slate-500">{flight.landings} ldg</span>
                       )}
-                    </td>
-                    <td className="px-3 py-3 text-right font-mono font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap tabular-nums">
-                      {min2hhmm(flight.totalFlightTime)}
-                    </td>
-                    <td className="px-3 py-3 text-center whitespace-nowrap">
-                      <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold tracking-wide ${role.cls}`}>
-                        {role.label}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-slate-500 dark:text-slate-400 tabular-nums">
-                      {flight.landings}
-                    </td>
-                  </tr>
+                    </div>
+                    {/* Row 3: PIC / remarks */}
+                    {(flight.nameOfPIC || flight.comments) && (
+                      <div className="mt-0.5 text-xs text-slate-400 dark:text-slate-500 truncate">
+                        {flight.nameOfPIC && <span>{flight.nameOfPIC}</span>}
+                        {flight.nameOfPIC && flight.comments && <span className="mx-1">·</span>}
+                        {flight.comments && <span className="italic">{flight.comments}</span>}
+                      </div>
+                    )}
+                  </div>
                 )
               })}
-            </tbody>
-          </table>
+            </div>
+
+            {/* ── Table — iPad / desktop ── */}
+            <table className="hidden md:table w-full text-sm">
+              <thead className="bg-slate-50 dark:bg-gray-900 sticky top-0 z-10 border-b border-slate-200 dark:border-gray-800">
+                <tr>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Date</th>
+                  <th className="text-left px-3 py-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Aircraft</th>
+                  <th className="text-left px-3 py-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Route</th>
+                  <th className="text-right px-3 py-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Time</th>
+                  <th className="text-center px-3 py-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Role</th>
+                  <th className="text-center px-4 py-2.5 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap">Ldg</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-gray-800">
+                {filtered.map((flight) => {
+                  const role = roleLabel(flight)
+                  return (
+                    <tr
+                      key={flight.id}
+                      onClick={() => onEdit(flight)}
+                      className="cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-gray-900 active:bg-sky-50 dark:active:bg-sky-950/30"
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap text-slate-500 dark:text-slate-400 text-xs tabular-nums">
+                        {fmtDate(flight.date)}
+                      </td>
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-slate-900 dark:text-slate-100 text-sm tracking-wide">{flight.registration}</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{flight.model}</div>
+                      </td>
+                      <td className="px-3 py-3 max-w-[200px]">
+                        <div className="text-slate-700 dark:text-slate-300 text-sm whitespace-nowrap">
+                          <span>{flight.from}</span>
+                          <span className="mx-1.5 text-slate-300 dark:text-slate-600">→</span>
+                          <span>{flight.to}</span>
+                          {flight.crossCountry && (
+                            <span className="ml-2 text-[10px] font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/40 px-1.5 py-0.5 rounded">XC</span>
+                          )}
+                        </div>
+                        {flight.nameOfPIC && (
+                          <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 whitespace-nowrap">{flight.nameOfPIC}</div>
+                        )}
+                        {flight.comments && (
+                          <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 italic truncate">{flight.comments}</div>
+                        )}
+                      </td>
+                      <td className="px-3 py-3 text-right font-mono font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap tabular-nums">
+                        {min2hhmm(flight.totalFlightTime)}
+                      </td>
+                      <td className="px-3 py-3 text-center whitespace-nowrap">
+                        <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold tracking-wide ${role.cls}`}>
+                          {role.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center text-slate-500 dark:text-slate-400 tabular-nums">
+                        {flight.landings}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
 
@@ -164,7 +218,7 @@ export default function LogbookPage({ flights, onAdd, onEdit, connected, onConne
       {/* FAB */}
       <button
         onClick={onAdd}
-        className="fixed bottom-28 right-5 w-14 h-14 bg-sky-500 active:bg-sky-600 text-white rounded-2xl shadow-lg shadow-sky-500/30 flex items-center justify-center z-20 select-none transition-colors"
+        className="fixed bottom-fab right-5 w-14 h-14 bg-sky-500 active:bg-sky-600 text-white rounded-2xl shadow-lg shadow-sky-500/30 flex items-center justify-center z-20 select-none transition-colors"
         aria-label="Add flight"
       >
         <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
