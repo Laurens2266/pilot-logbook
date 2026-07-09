@@ -54,7 +54,7 @@ export default function StatisticsPage({ flights }) {
     const landings = sum('landings')
     const se       = flights.filter(f => f.se).reduce((acc, f) => acc + (f.totalFlightTime || 0), 0)
 
-    const recent         = flights.filter(f => withinDays(f.date, 90))
+    const recent         = flights.filter(f => withinDays(f.date, 90) && (f.pic > 0 || f.fi > 0))
     const recentHours    = recent.reduce((acc, f) => acc + (f.totalFlightTime || 0), 0)
     const recentLandings = recent.reduce((acc, f) => acc + (f.landings || 0), 0)
 
